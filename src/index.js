@@ -36,7 +36,7 @@ const server = http.createServer(app)
 const socketIo = new io.Server(server)
 global.io = socketIo.listen(server)
 global.io.on('connection', connection)
-server.listen(port);
+server.listen(port)
 server.on("listening", () => {
     console.log(`Listening on port: ${port}`)
-});
+})

@@ -1,5 +1,5 @@
 import UserService from '../services/user.js'
-import multer from "multer";
+import multer from "multer"
 
 
 const maxFileSize = 5 * 1024 * 1024
@@ -17,8 +17,9 @@ const upload = multer({
     }
 }).single('avatar')
 
-export default {
-    onUploadAvatar: async (req, res) => {
+class UserController {
+
+    async onUploadAvatar(req, res) {
         upload(req, res, async function (e) {
             if (e) {
                 return res.status(500).json({error: e.error, message: e.message})
@@ -30,56 +31,63 @@ export default {
                 return res.status(500).json({error: e.error, message: e.message})
             }
         })
-    },
-    onDeleteAvatar: async (req, res) => {
+    }
+
+    async onDeleteAvatar(req, res) {
         try {
             await UserService.onDeleteAvatar(req.user, req.body.avatarUrl)
             return res.status(200).send()
         } catch (e) {
             return res.status(500).json({error: e.error, message: e.message})
         }
-    },
-    onGetUserByReferenceName: async (req, res) => {
+    }
+
+    async onGetUserByReferenceName(req, res) {
         try {
             const user = await UserService.onGetUserByReferenceName(req.params.name)
             return res.status(200).json(user)
         } catch (e) {
             return res.status(500).json({error: e.error, message: e.message})
         }
-    },
-    onGetUserById: async (req, res) => {
+    }
+
+    async onGetUserById(req, res) {
         try {
             const user = await UserService.onGetUserById(req.params.id)
             return res.status(200).json(user)
         } catch (e) {
             return res.status(500).json({error: e.error, message: e.message})
         }
-    },
-    onGetContacts: async (req, res) => {
+    }
+
+    async onGetContacts(req, res) {
         try {
             const result = await UserService.onGetContacts(req.user)
             return res.status(200).json(result)
         } catch (e) {
             return res.status(500).json({error: e.error, message: e.message})
         }
-    },
-    onDeleteContact: async (req, res) => {
+    }
+
+    async onDeleteContact(req, res) {
         try {
             const result = await UserService.onDeleteContact(req.user, req.params.id)
             return res.status(200).json(result)
         } catch (e) {
             return res.status(500).json({error: e.error, message: e.message})
         }
-    },
-    onGetBlockedUsers: async (req, res) => {
+    }
+
+    async onGetBlockedUsers(req, res) {
         try {
             const result = await UserService.onGetBlockedUsers(req.user)
             return res.status(200).json(result)
         } catch (e) {
             return res.status(500).json({error: e.error, message: e.message})
         }
-    },
-    onDeleteAccount: async (req, res) => {
+    }
+
+    async onDeleteAccount(req, res) {
         try {
             await UserService.onDeleteAccount(req.user.id)
             return res.status(200).json({
@@ -89,15 +97,17 @@ export default {
         } catch (e) {
             return res.status(500).json({error: e.error, message: e.message})
         }
-    },
-    onGetUserAccount: async (req, res) => {
+    }
+
+    async onGetUserAccount(req, res) {
         try {
             return res.status(200).json(req.user)
         } catch (e) {
             return res.status(500).json({error: e.error, message: e.message})
         }
-    },
-    submitContactRequest: async (req, res) => {
+    }
+
+    async submitContactRequest(req, res) {
         try {
             const result = await UserService.submitContactRequest(req.user, req.params.id)
             return res.status(200).json({
@@ -108,61 +118,70 @@ export default {
         } catch (e) {
             return res.status(500).json({error: e.error, message: e.message})
         }
-    },
-    sendContactRequest: async (req, res) => {
+    }
+
+    async sendContactRequest(req, res) {
         try {
             await UserService.sendContactRequest(req.user, req.params.id)
             return res.status(200).send()
         } catch (e) {
             return res.status(500).json({error: e.error, message: e.message})
         }
-    },
-    declineIncomingContactRequest: async (req, res) => {
+    }
+
+    async declineIncomingContactRequest(req, res) {
         try {
             await UserService.declineIncomingContactRequest(req.user, req.params.id)
             return res.status(200).send()
         } catch (e) {
             return res.status(500).json({error: e.error, message: e.message})
         }
-    },
-    declineOutgoingContactRequest: async (req, res) => {
+    }
+
+    async declineOutgoingContactRequest(req, res) {
         try {
             await UserService.declineOutgoingContactRequest(req.user, req.params.id)
             return res.status(200).send()
         } catch (e) {
             return res.status(500).json({error: e.error, message: e.message})
         }
-    },
-    blockUser: async (req, res) => {
+    }
+
+    async blockUser(req, res) {
         try {
             await UserService.blockUser(req.user, req.params.id)
             return res.status(200).send()
         } catch (e) {
             return res.status(500).json({error: e.error, message: e.message})
         }
-    },
-    unblockUser: async (req, res) => {
+    }
+
+    async unblockUser(req, res) {
         try {
             await UserService.unblockUser(req.user, req.params.id)
             return res.status(200).send()
         } catch (e) {
             return res.status(500).json({error: e.error, message: e.message})
         }
-    },
-    changePassword: async (req, res) => {
+    }
+
+    async changePassword(req, res) {
         try {
             await UserService.changePassword(req.user, req.body.password, req.body.oldPassword)
             return res.status(200).send()
         } catch (e) {
             return res.status(500).json({error: e.error, message: e.message})
         }
-    },
-    updateUser: async (req, res) => {
+    }
+
+    async updateUser(req, res) {
         try {
             await UserService.updateUser(req.user)
             return res.status(200).json(req.user)
         } catch (e) {
             return res.status(500).json({error: e.error, message: e.message})
         }
-    },
+    }
 }
+
+export default new UserController()

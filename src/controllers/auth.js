@@ -1,8 +1,8 @@
 import AutService from "../services/auth.js"
 import makeValidation from "@withvoid/make-validation"
 
-export default {
-    logIn: async (req, res, next) => {
+class AuthController {
+    async logIn(req, res, next) {
         try {
             let body = req.body
             const validation = makeValidation(types => ({
@@ -13,15 +13,16 @@ export default {
                 }
             }))
             if (!validation.success) {
-                return res.status(400).json(validation);
+                return res.status(400).json(validation)
             }
             req.user = await AutService.logIn(body.email, body.password)
             next()
         } catch (e) {
             return res.status(500).json({error: e.error, message: e.message})
         }
-    },
-    signUp: async (req, res, next) => {
+    }
+
+    async signUp(req, res, next) {
         try {
             let body = req.body
             const validation = makeValidation(types => ({
@@ -34,15 +35,16 @@ export default {
                 }
             }))
             if (!validation.success) {
-                return res.status(400).json(validation);
+                return res.status(400).json(validation)
             }
             req.user = await AutService.signUp(body)
             next()
         } catch (e) {
             return res.status(500).json({error: e.error, message: e.message})
         }
-    },
-    logOut: async (req, res) => {
+    }
+
+    async logOut(req, res) {
         try {
             let body = req.body
             const validation = makeValidation(types => ({
@@ -52,12 +54,14 @@ export default {
                 }
             }))
             if (!validation.success) {
-                return res.status(400).json(validation);
+                return res.status(400).json(validation)
             }
             await AutService.logOut(body.id)
-            return res.status(200).json();
+            return res.status(200).json()
         } catch (e) {
             return res.status(500).json({error: e.error, message: e.message})
         }
-    },
+    }
 }
+
+export default new AuthController()

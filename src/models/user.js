@@ -1,6 +1,5 @@
 import mongoose from "mongoose"
 import validator from "validator"
-import bcrypt from "bcryptjs"
 
 const userSchema = new mongoose.Schema(
     {
@@ -52,7 +51,7 @@ const userSchema = new mongoose.Schema(
         timestamps: true,
         collection: "users",
     }
-);
+)
 
 userSchema.statics.createUser = async function (
     name,
@@ -60,11 +59,11 @@ userSchema.statics.createUser = async function (
     email,
     password,
 ) {
-    return await this.create({name, referenceName, email, password});
+    return await this.create({name, referenceName, email, password})
 }
 
 userSchema.statics.getUsers = async function () {
-    return User.find();
+    return User.find()
 }
 
 userSchema.statics.getUserById = async function (id) {
@@ -76,11 +75,11 @@ userSchema.statics.getUserById = async function (id) {
 }
 
 userSchema.statics.updateUserById = async function (user) {
-    return User.updateOne({_id: id}, user);
+    return User.updateOne({_id: id}, user)
 }
 
 userSchema.statics.updateUser = async function (user) {
-    return User.updateOne({_id: user.id}, user);
+    return User.updateOne({_id: user.id}, user)
 }
 
 userSchema.statics.deleteUserById = async function (id) {
@@ -88,7 +87,7 @@ userSchema.statics.deleteUserById = async function (id) {
 }
 
 userSchema.statics.getUserByIds = async function (ids) {
-    return User.find({_id: {$in: ids}});
+    return User.find({_id: {$in: ids}})
 }
 
 // userSchema.pre('save', async function (next) {

@@ -1,8 +1,8 @@
-import validator from "../utils/validator.js";
-import User from "../models/user.js";
-import bcrypt from "bcryptjs";
+import validator from "../utils/validator.utils.js"
+import User from "../models/user.js"
+import bcrypt from "bcryptjs"
 
-export default class AuthService {
+class AuthService {
     async logIn(email, password) {
         validator.validateCredentials(email, password)
 
@@ -33,3 +33,5 @@ export default class AuthService {
         return await User.updateUserById(id, {token: '', refreshToken: ''})
     }
 }
+
+export default new AuthService()

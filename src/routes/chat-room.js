@@ -1,7 +1,7 @@
 import express from 'express'
 import chatRoom from '../controllers/chat-room.js'
 
-const router = express.Router();
+const router = express.Router()
 
 router
     .get('/', chatRoom.getRecentConversation)

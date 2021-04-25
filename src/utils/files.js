@@ -1,14 +1,22 @@
-import * as uuid from 'uuid';
-import * as path from 'path';
+import * as uuid from 'uuid'
+import * as path from 'path'
+import fs from 'fs'
 
-export default {
-    saveImage: async (file) => {
+class FileUtils {
+    async saveImage(file) {
         const fileName = uuid.v4() + '.jpg'
         const filePath = path.resolve('./images', fileName)
         await file.mv(filePath)
         return fileName
-    },
-    deleteImage: (filePath) => {
+    }
 
+    async deleteImage(filePath) {
+        await fs.unlink(filePath, (err) => {
+            if (err) {
+                throw err;
+            }
+        })
     }
 }
+
+export default new FileUtils()

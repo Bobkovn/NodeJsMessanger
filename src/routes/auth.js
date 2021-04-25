@@ -1,4 +1,4 @@
-import express from 'express';
+import express from 'express'
 
 import auth from '../controllers/auth.js'
 import {generateAuthTokens, refreshToken} from "../middlewares/jwt.js"

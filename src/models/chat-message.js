@@ -1,44 +1,29 @@
-import mongoose from "mongoose";
-import {v4 as uuidv4} from "uuid";
+import mongoose from "mongoose"
 
-const MESSAGE_TYPES = {
-    TYPE_TEXT: "text",
-};
-
-const readByRecipientSchema = new mongoose.Schema(
-    {
-        _id: false,
-        readByUserId: String,
-        readAt: {
-            type: Date,
-            default: Date.now(),
-        },
-    },
-    {
-        timestamps: false,
-    }
-);
+export const ATTACHMENT_TYPES = {
+    IMAGE: "image",
+    VIDEO: "video",
+    COORDINATES: "coordinates",
+}
 
 const chatMessageSchema = new mongoose.Schema(
     {
-        _id: {
-            type: String,
-            default: () => uuidv4().replace(/\-/g, ""),
-        },
         chatRoomId: String,
-        message: mongoose.Schema.Types.Mixed,
-        type: {
+        text: {
             type: String,
-            default: () => MESSAGE_TYPES.TYPE_TEXT,
         },
-        postedByUser: String,
-        readByRecipients: [readByRecipientSchema],
+        postedByUserId: String,
+        readByUserIds: [String],
+        attachments: [{
+            type: String,
+            data: String
+        }]
     },
     {
         timestamps: true,
         collection: "chatmessages",
     }
-);
+)
 
 chatMessageSchema.statics.createPostInChatRoom = async function (chatRoomId, message, postedByUser) {
     try {
@@ -47,7 +32,7 @@ chatMessageSchema.statics.createPostInChatRoom = async function (chatRoomId, mes
             message,
             postedByUser,
             readByRecipients: {readByUserId: postedByUser}
-        });
+        })
         const aggregate = await this.aggregate([
             {$match: {_id: post._id}},
             {
@@ -92,10 +77,10 @@ chatMessageSchema.statics.createPostInChatRoom = async function (chatRoomId, mes
                     updatedAt: {$last: '$updatedAt'},
                 }
             }
-        ]);
-        return aggregate[0];
+        ])
+        return aggregate[0]
     } catch (error) {
-        throw error;
+        throw error
     }
 }
 
@@ -116,9 +101,9 @@ chatMessageSchema.statics.getConversationByRoomId = async function (chatRoomId, 
             {$skip: options.page * options.limit},
             {$limit: options.limit},
             {$sort: {createdAt: 1}},
-        ]);
+        ])
     } catch (error) {
-        throw error;
+        throw error
     }
 }
 
@@ -137,10 +122,10 @@ chatMessageSchema.statics.markMessageRead = async function (chatRoomId, userId) 
             {
                 multi: true
             }
-        );
+        )
     } catch (error) {
-        throw error;
+        throw error
     }
 }
 
-export default mongoose.model("ChatMessage", chatMessageSchema);
+export default mongoose.model("ChatMessage", chatMessageSchema)

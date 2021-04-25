@@ -1,11 +1,10 @@
 import UserModel from "../models/user.js"
 import FileUtils from "../utils/files.js"
-import validator from "../utils/validator.js"
+import validator from "../utils/validator.utils.js"
 import bcrypt from "bcryptjs"
 import mongoose from "mongoose"
 
-
-export default class UserService {
+class UserService {
     async onUploadAvatar(user, avatar) {
         const fileName = await FileUtils.saveImage(avatar)
         user.avatars.push(fileName)
@@ -13,11 +12,11 @@ export default class UserService {
     }
 
     async onDeleteAvatar(user, avatarUrl) {
-
+        await FileUtils.deleteImage(avatarUrl)
     }
 
     async onGetUserByReferenceName(name) {
-        return UserModel.findOne({referenceName: name});
+        return UserModel.findOne({referenceName: name})
     }
 
     async onGetUserById(id) {
@@ -30,7 +29,7 @@ export default class UserService {
         const contactOutgoingRequestIds = user.contactOutgoingRequestIds
         const [contacts, incomingContacts, outgoingContacts] = await Promise.all([UserModel.getUserByIds(contactIds),
             UserModel.getUserByIds(contactIncomingRequestIds),
-            UserModel.getUserByIds(contactOutgoingRequestIds)]);
+            UserModel.getUserByIds(contactOutgoingRequestIds)])
         return {
             contacts: [...contacts],
             incomingContacts: [...incomingContacts],
@@ -39,9 +38,15 @@ export default class UserService {
     }
 
     async onDeleteContact(user, contactId) {
+        const contact = await UserModel.getUserById(contactId)
         const session = await mongoose.startSession()
         session.startTransaction()
         try {
+            user.contactIds = user.contactIds.filter(id => id !== contactId)
+            contact.contactIds = contact.contactIds.filter(id => id !== user.id)
+
+            await Promise.all([UserModel.updateOne({_id: user._id}, user, {session}),
+                UserModel.updateOne({_id: contact._id}, contact, {session})])
 
             await session.commitTransaction()
             session.endSession()
@@ -65,11 +70,18 @@ export default class UserService {
     }
 
     async submitContactRequest(user, contactId) {
-        const contact = UserModel.getUserById(contactId)
-
+        const contact = await UserModel.getUserById(contactId)
         const session = await mongoose.startSession()
         session.startTransaction()
         try {
+            user.contactIds.push(contactId)
+            contact.contactIds.push(user._id)
+
+            user.contactIncomingRequestIds = user.contactIncomingRequestIds.filter(id => id !== contactId)
+            contact.contactOutgoingRequestIds = contact.contactOutgoingRequestIds.filter(id => id !== user.id)
+
+            await Promise.all([UserModel.updateOne({_id: user._id}, user, {session}),
+                UserModel.updateOne({_id: contact._id}, contact, {session})])
 
             await session.commitTransaction()
             session.endSession()
@@ -82,9 +94,15 @@ export default class UserService {
     }
 
     async sendContactRequest(user, contactId) {
+        const contact = await UserModel.getUserById(contactId)
         const session = await mongoose.startSession()
         session.startTransaction()
         try {
+            user.contactOutgoingRequestIds.push(contactId)
+            contact.contactIncomingRequestIds.push(user._id)
+
+            await Promise.all([UserModel.updateOne({_id: user._id}, user, {session}),
+                UserModel.updateOne({_id: contact._id}, contact, {session})])
 
             await session.commitTransaction()
             session.endSession()
@@ -96,9 +114,15 @@ export default class UserService {
     }
 
     async declineIncomingContactRequest(user, contactId) {
+        const contact = await UserModel.getUserById(contactId)
         const session = await mongoose.startSession()
         session.startTransaction()
         try {
+            user.contactIncomingRequestIds = user.contactIncomingRequestIds.filter(id => id !== contactId)
+            contact.contactOutgoingRequestIds = contact.contactOutgoingRequestIds.filter(id => id !== user.id)
+
+            await Promise.all([UserModel.updateOne({_id: user._id}, user, {session}),
+                UserModel.updateOne({_id: contact._id}, contact, {session})])
 
             await session.commitTransaction()
             session.endSession()
@@ -110,9 +134,15 @@ export default class UserService {
     }
 
     async declineOutgoingContactRequest(user, contactId) {
+        const contact = await UserModel.getUserById(contactId)
         const session = await mongoose.startSession()
         session.startTransaction()
         try {
+            user.contactOutgoingRequestIds = user.contactOutgoingRequestIds.filter(id => id !== contactId)
+            contact.contactIncomingRequestIds = contact.contactIncomingRequestIds.filter(id => id !== user.id)
+
+            await Promise.all([UserModel.updateOne({_id: user._id}, user, {session}),
+                UserModel.updateOne({_id: contact._id}, contact, {session})])
 
             await session.commitTransaction()
             session.endSession()
@@ -124,11 +154,13 @@ export default class UserService {
     }
 
     async blockUser(user, userId) {
-
+        user.blockedUserIds.push(userId)
+        await UserModel.updateOne({_id: user._id}, user)
     }
 
     async unblockUser(user, userId) {
-
+        user.blockedUserIds = user.blockedUserIds.filter(id => id !== userId)
+        await UserModel.updateOne({_id: user._id}, user)
     }
 
     async changePassword(user, newPassword, oldPassword) {
@@ -159,3 +191,5 @@ export default class UserService {
         return user
     }
 }
+
+export default new UserService()

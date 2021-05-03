@@ -27,9 +27,11 @@ class UserService {
         const contactIds = user.contactIds
         const contactIncomingRequestIds = user.contactIncomingRequestIds
         const contactOutgoingRequestIds = user.contactOutgoingRequestIds
+
         const [contacts, incomingContacts, outgoingContacts] = await Promise.all([UserModel.getUserByIds(contactIds),
             UserModel.getUserByIds(contactIncomingRequestIds),
             UserModel.getUserByIds(contactOutgoingRequestIds)])
+
         return {
             contacts: [...contacts],
             incomingContacts: [...incomingContacts],
@@ -182,8 +184,17 @@ class UserService {
         return await UserModel.updateUser(user)
     }
 
-    async onGetUserByToken(id, tokenType, token) {
-        const user = await UserModel.findOne({_id: id, tokenType: token})
+    async onGetUserByToken(id, token) {
+        const user = await UserModel.findOne({_id: id, token: token})
+
+        if (!user) {
+            throw new Error('Please authenticate')
+        }
+        return user
+    }
+
+    async onGetUserByRefreshToken(id, token) {
+        const user = await UserModel.findOne({_id: id, refreshToken: token})
 
         if (!user) {
             throw new Error('Please authenticate')

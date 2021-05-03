@@ -6,7 +6,7 @@ export const auth = async (req, res, next) => {
     try {
         const token = req.header('Authorization').replace('Bearer ', '')
         const decoded = jwt.verify(token, process.env.JWT_SECRET)
-        req.user = await UserService.onGetUserByToken(decoded._id, 'token', token)
+        req.user = await UserService.onGetUserByToken(decoded._id, token)
         next()
     } catch (e) {
         res.status(401).send({error: e.error, message: e.message})
@@ -39,7 +39,7 @@ export const refreshToken = async (req, res) => {
     try {
         const refreshToken = req.header('Authorization').replace('Bearer ', '')
         const decoded = jwt.verify(refreshToken, process.env.REFRESH_JWT_SECRET)
-        const user = await UserService.onGetUserByToken(decoded._id, 'refreshToken', refreshToken)
+        const user = await UserService.onGetUserByRefreshToken(decoded._id, refreshToken)
 
         const token = jwt.sign({_id: user._id.toString()}, process.env.JWT_SECRET, {expiresIn: "5m"})
 

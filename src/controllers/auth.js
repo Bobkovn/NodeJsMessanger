@@ -46,17 +46,7 @@ class AuthController {
 
     async logOut(req, res) {
         try {
-            let body = req.body
-            const validation = makeValidation(types => ({
-                payload: body,
-                checks: {
-                    id: {type: types.string},
-                }
-            }))
-            if (!validation.success) {
-                return res.status(400).json(validation)
-            }
-            await AutService.logOut(body.id)
+            await AutService.logOut(req.user._id)
             return res.status(200).json()
         } catch (e) {
             return res.status(500).json({error: e.error, message: e.message})

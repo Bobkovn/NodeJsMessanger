@@ -18,6 +18,7 @@ router
     .post('/sendContactRequest/:id', auth, user.sendContactRequest)
     .post('/declineIncomingContactRequest/:id', auth, user.declineIncomingContactRequest)
     .post('/declineOutgoingContactRequest/:id', auth, user.declineOutgoingContactRequest)
+    .delete('/deleteContact/:id', auth, user.deleteContact)
     .post('/block/:id', auth, user.blockUser)
     .post('/unblock/:id', auth, user.unblockUser)
     .patch('/changePassword', auth, user.changePassword)

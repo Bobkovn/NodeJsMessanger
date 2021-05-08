@@ -16,8 +16,8 @@ export const auth = async (req, res, next) => {
 export const generateAuthTokens = async (req, res) => {
     try {
         const user = req.user
-        const token = jwt.sign({_id: user._id.toString()}, process.env.JWT_SECRET, {expiresIn: "5m"})
-        const refreshToken = jwt.sign({_id: user._id.toString()}, process.env.REFRESH_JWT_SECRET, {expiresIn: "31d"})
+        const token = jwt.sign({_id: user._id}, process.env.JWT_SECRET, {expiresIn: "1h"})
+        const refreshToken = jwt.sign({_id: user._id}, process.env.REFRESH_JWT_SECRET, {expiresIn: "31d"})
 
         user.token = token
         user.refreshToken = refreshToken
@@ -37,11 +37,11 @@ export const generateAuthTokens = async (req, res) => {
 
 export const refreshToken = async (req, res) => {
     try {
-        const refreshToken = req.header('Authorization').replace('Bearer ', '')
+        const refreshToken = req.body.refreshToken
         const decoded = jwt.verify(refreshToken, process.env.REFRESH_JWT_SECRET)
         const user = await UserService.onGetUserByRefreshToken(decoded._id, refreshToken)
 
-        const token = jwt.sign({_id: user._id.toString()}, process.env.JWT_SECRET, {expiresIn: "5m"})
+        const token = jwt.sign({_id: user._id}, process.env.JWT_SECRET, {expiresIn: "1h"})
 
         user.token = token
         await user.save()

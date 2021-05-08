@@ -1,11 +1,9 @@
 import UserService from '../services/user.js'
 import multer from "multer"
 
-
 const maxFileSize = 5 * 1024 * 1024
 
 const upload = multer({
-    dest: './images',
     limits: {
         fileSize: maxFileSize
     },
@@ -14,7 +12,7 @@ const upload = multer({
             return cb(new Error('Please upload an image'))
         }
         cb(undefined, true)
-    }
+    },
 }).single('avatar')
 
 class UserController {
@@ -24,12 +22,12 @@ class UserController {
             if (e) {
                 return res.status(500).json({error: e.error, message: e.message})
             }
-            try {
-                await UserService.onUploadAvatar(req.user, req.file)
-                res.send()
-            } catch (e) {
-                return res.status(500).json({error: e.error, message: e.message})
-            }
+            await UserService.onUploadAvatar(req.user, req.file, function (err, filePath) {
+                if (err) {
+                    return res.status(500).json({error: e.error, message: e.message})
+                }
+                return res.status(200).json({avatar: filePath})
+            })
         })
     }
 
@@ -91,7 +89,6 @@ class UserController {
         try {
             await UserService.onDeleteAccount(req.user.id)
             return res.status(200).json({
-                success: true,
                 message: `Your account was deleted`
             })
         } catch (e) {
@@ -101,7 +98,7 @@ class UserController {
 
     async onGetUserAccount(req, res) {
         try {
-            return res.status(200).json(req.user)
+            return res.status(200).json(req.user.toPrivateJSON())
         } catch (e) {
             return res.status(500).json({error: e.error, message: e.message})
         }
@@ -111,8 +108,6 @@ class UserController {
         try {
             const result = await UserService.submitContactRequest(req.user, req.params.id)
             return res.status(200).json({
-                success: true,
-                message: `Contact submitted`,
                 contact: result
             })
         } catch (e) {
@@ -141,6 +136,15 @@ class UserController {
     async declineOutgoingContactRequest(req, res) {
         try {
             await UserService.declineOutgoingContactRequest(req.user, req.params.id)
+            return res.status(200).send()
+        } catch (e) {
+            return res.status(500).json({error: e.error, message: e.message})
+        }
+    }
+
+    async deleteContact(req, res) {
+        try {
+            await UserService.deleteContact(req.user, req.params.id)
             return res.status(200).send()
         } catch (e) {
             return res.status(500).json({error: e.error, message: e.message})

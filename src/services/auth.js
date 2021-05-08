@@ -20,17 +20,17 @@ class AuthService {
         return user
     }
 
-    async signUp({name, referenceName, email, password}) {
-        validator.validateCredentials(email, password)
+    async signUp(user) {
+        validator.validateCredentials(user.email, user.password)
 
         const salt = await bcrypt.genSalt(10)
-        const hashedPassword = await bcrypt.hash(password, salt)
+        user.password = await bcrypt.hash(user.password, salt)
 
-        return await User.createUser(name, referenceName, email, hashedPassword)
+        return await User.create(user)
     }
 
     async logOut(id) {
-        return await User.updateUserById(id, {token: '', refreshToken: ''})
+        return User.updateOne({_id: id}, {token: '', refreshToken: ''})
     }
 }
 

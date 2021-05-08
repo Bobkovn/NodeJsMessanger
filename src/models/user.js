@@ -53,15 +53,6 @@ const userSchema = new mongoose.Schema(
     }
 )
 
-userSchema.statics.createUser = async function (
-    name,
-    referenceName,
-    email,
-    password,
-) {
-    return await this.create({name, referenceName, email, password})
-}
-
 userSchema.statics.getUsers = async function () {
     return User.find()
 }
@@ -74,12 +65,8 @@ userSchema.statics.getUserById = async function (id) {
     return user
 }
 
-userSchema.statics.updateUserById = async function (user) {
-    return User.updateOne({_id: id}, user)
-}
-
 userSchema.statics.updateUser = async function (user) {
-    return User.updateOne({_id: user.id}, user)
+    return User.updateOne({_id: user._id}, user)
 }
 
 userSchema.statics.deleteUserById = async function (id) {
@@ -90,21 +77,6 @@ userSchema.statics.getUserByIds = async function (ids) {
     return User.find({_id: {$in: ids}})
 }
 
-// userSchema.pre('save', async function (next) {
-//     if (this.isModified('password')) {
-//         const salt = await bcrypt.genSalt(10)
-//         this.password = await bcrypt.hash(this.password, salt)
-//     }
-//     next()
-// })
-
-// Delete user data when user is removed
-// userSchema.pre('remove', async function (next) {
-//     const user = this
-//     await Task.deleteMany({ owner: user._id })
-//     next()
-// })
-
 userSchema.methods.toJSON = function () {
     const user = this
     const userObject = user.toObject()
@@ -113,6 +85,7 @@ userSchema.methods.toJSON = function () {
     delete userObject._id
     delete userObject.password
     delete userObject.token
+    delete userObject.email
     delete userObject.refreshToken
     delete userObject.online
     delete userObject.onlineStatus
@@ -122,6 +95,24 @@ userSchema.methods.toJSON = function () {
     delete userObject.contactIncomingRequestIds
     delete userObject.contactOutgoingRequestIds
     delete userObject.blockedUserIds
+    delete userObject.createdAt
+    delete userObject.updatedAt
+    delete userObject.__v
+
+    return userObject
+}
+
+userSchema.methods.toPrivateJSON = function () {
+    const user = this
+    const userObject = user.toObject()
+
+    userObject.id = userObject._id.toString()
+    delete userObject._id
+    delete userObject.password
+    delete userObject.token
+    delete userObject.refreshToken
+    delete userObject.online
+    delete userObject.lastSeen
     delete userObject.__v
 
     return userObject

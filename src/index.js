@@ -1,10 +1,11 @@
 import http from "http"
 import express from "express"
 import * as io from "socket.io"
+import * as path from 'path'
 
 import "./db/mongo.js"
 
-import {connection}  from "./websocket/chat.js"
+import {connection} from "./websocket/chat.js"
 
 import authRouter from "./routes/auth.js"
 import userRouter from "./routes/user.js"
@@ -16,8 +17,8 @@ const port = process.env.PORT
 app.set("port", port)
 
 app.use(express.json())
-app.use(express.static('./images'))
-app.use(express.urlencoded({ extended: false }))
+app.use(express.static( path.resolve() + '/images'))
+app.use(express.urlencoded({extended: false}))
 
 app.use("/api/v0/auth", authRouter)
 app.use("/api/v0/users", userRouter)

@@ -161,30 +161,10 @@ class UserService {
         }
     }
 
-    async deleteContact(user, contactId) {
-        const contact = await UserModel.getUserById(contactId)
-        const session = await mongoose.startSession()
-        session.startTransaction()
-        try {
-            user.contacts = user.contacts.filter(id => id !== contactId)
-            contact.contacts = contact.contacts.filter(id => id !== user.id)
-
-            await Promise.all([UserModel.updateOne({_id: user._id}, user, {session}),
-                UserModel.updateOne({_id: contact._id}, contact, {session})])
-
-            await session.commitTransaction()
-            session.endSession()
-        } catch (e) {
-            await session.abortTransaction()
-            session.endSession()
-            throw e
-        }
-    }
-
     async blockUser(user, userId) {
         user.blockedUserIds.push(userId)
         if (user.contacts.includes(userId)) {
-            await this.deleteContact(user, userId)
+            await this.onDeleteContact(user, userId)
         }
         await UserModel.updateOne({_id: user._id}, user)
     }

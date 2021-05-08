@@ -142,15 +142,6 @@ class UserController {
         }
     }
 
-    async deleteContact(req, res) {
-        try {
-            await UserService.deleteContact(req.user, req.params.id)
-            return res.status(200).send()
-        } catch (e) {
-            return res.status(500).json({error: e.error, message: e.message})
-        }
-    }
-
     async blockUser(req, res) {
         try {
             await UserService.blockUser(req.user, req.params.id)

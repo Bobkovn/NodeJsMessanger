@@ -24,7 +24,7 @@ class UserController {
             }
             await UserService.onUploadAvatar(req.user, req.file, function (err, filePath) {
                 if (err) {
-                    return res.status(500).json({error: e.error, message: e.message})
+                    return res.status(500).json({error: err.error, message: err.message})
                 }
                 return res.status(200).json({avatar: filePath})
             })
@@ -32,12 +32,12 @@ class UserController {
     }
 
     async onDeleteAvatar(req, res) {
-        try {
-            await UserService.onDeleteAvatar(req.user, req.body.avatarUrl)
+        await UserService.onDeleteAvatar(req.user, req.body.avatarUrl, function (err) {
+            if (err) {
+                return res.status(500).json({error: err.error, message: err.message})
+            }
             return res.status(200).send()
-        } catch (e) {
-            return res.status(500).json({error: e.error, message: e.message})
-        }
+        })
     }
 
     async onGetUserByReferenceName(req, res) {

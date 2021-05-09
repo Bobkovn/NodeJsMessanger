@@ -1,6 +1,6 @@
 import UserModel from "../models/user.js"
 import FileUtils from "../utils/files.js"
-import validator from "../utils/validator.utils.js"
+import validator from "../utils/validator.js"
 import bcrypt from "bcryptjs"
 import mongoose from "mongoose"
 
@@ -10,15 +10,22 @@ class UserService {
             if (err) {
                 callback(err, null)
             } else {
-                user.avatars.push(fileName)
+                const result = process.env.IMAGE_PATH + fileName
+                user.avatars.push(result)
                 await user.save()
-                callback(null, process.env.IMAGE_PATH + fileName)
+                callback(null, result)
             }
         })
     }
 
-    async onDeleteAvatar(user, avatarUrl) {
-        await FileUtils.deleteImage(avatarUrl)
+    async onDeleteAvatar(user, avatarUrl, callback) {
+        await FileUtils.deleteImage(avatarUrl, async function (err) {
+            if (!err) {
+                user.avatars = user.avatars.filter(url => url !== avatarUrl)
+                await user.save()
+            }
+            callback(err)
+        })
     }
 
     async onGetUserByReferenceName(name) {
@@ -165,8 +172,9 @@ class UserService {
         user.blockedUserIds.push(userId)
         if (user.contacts.includes(userId)) {
             await this.onDeleteContact(user, userId)
+        } else {
+            await UserModel.updateOne({_id: user._id}, user)
         }
-        await UserModel.updateOne({_id: user._id}, user)
     }
 
     async unblockUser(user, userId) {
@@ -181,7 +189,9 @@ class UserService {
             throw new Error('Invalid password')
         }
 
-        validator.validatePassword(newPassword)
+        if (!validator.validatePassword(newPassword)) {
+            throw new Error('Invalid password')
+        }
 
         const salt = await bcrypt.genSalt(10)
         user.password = await bcrypt.hash(newPassword, salt)

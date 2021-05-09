@@ -1,24 +1,33 @@
-// utils
-import makeValidation from '@withvoid/make-validation'
-// models
 import ChatRoomModel, {CHAT_ROOM_TYPES} from '../models/chat-room.js'
 import ChatMessageModel from '../models/chat-message.js'
 import UserModel from '../models/user.js'
+import Ajv from "ajv"
+
+const ajv = new Ajv()
 
 class ChatRoomController {
     async initiate(req, res) {
         try {
-            const validation = makeValidation(types => ({
-                payload: req.body,
-                checks: {
+            let body = req.body
+            const schema = {
+                type: "object",
+                properties: {
                     userIds: {
-                        type: types.array,
-                        options: {unique: true, empty: false, stringOnly: true}
+                        elements: {
+                            type: "string"
+                        }
                     },
-                    type: {type: types.enum, options: {enum: CHAT_ROOM_TYPES}},
-                }
-            }))
-            if (!validation.success) return res.status(400).json({...validation})
+                    type: {enum: CHAT_ROOM_TYPES}
+                },
+                required: ["userIds", "type"],
+                additionalProperties: true,
+            }
+
+            const validate = ajv.compile(schema)
+            const valid = validate(body)
+            if (!valid) {
+                return res.status(400).json(validate.errors)
+            }
 
             const {userIds, type} = req.body
             const {userId: chatInitiator} = req
@@ -32,14 +41,21 @@ class ChatRoomController {
 
     async postMessage(req, res) {
         try {
-            const {roomId} = req.params
-            const validation = makeValidation(types => ({
-                payload: req.body,
-                checks: {
-                    messageText: {type: types.string},
-                }
-            }))
-            if (!validation.success) return res.status(400).json({...validation})
+            let body = req.body
+            const schema = {
+                type: "object",
+                properties: {
+                    messageText: {type: "string"}
+                },
+                required: ["messageText"],
+                additionalProperties: true,
+            }
+
+            const validate = ajv.compile(schema)
+            const valid = validate(body)
+            if (!valid) {
+                return res.status(400).json(validate.errors)
+            }
 
             const messagePayload = {
                 messageText: req.body.messageText,

@@ -15,11 +15,9 @@ class FileUtils {
         })
     }
 
-    async deleteImage(filePath) {
+    async deleteImage(filePath, callback) {
         await fs.unlink(filePath, (err) => {
-            if (err) {
-                throw err
-            }
+            callback(err)
         })
     }
 }

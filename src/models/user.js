@@ -1,5 +1,5 @@
 import mongoose from "mongoose"
-import validator from "validator"
+import validator from "../utils/validator.js"
 
 const userSchema = new mongoose.Schema(
     {
@@ -26,7 +26,7 @@ const userSchema = new mongoose.Schema(
             trim: true,
             lowercase: true,
             validate(value) {
-                if (!validator.isEmail(value)) {
+                if (!validator.validateEmail(value)) {
                     throw new Error('Email is invalid')
                 }
             }

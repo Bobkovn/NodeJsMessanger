@@ -1,10 +1,15 @@
-import validator from "../utils/validator.utils.js"
+import validator from "../utils/validator.js"
 import User from "../models/user.js"
 import bcrypt from "bcryptjs"
 
 class AuthService {
     async logIn(email, password) {
-        validator.validateCredentials(email, password)
+        if (!validator.validateEmail(email)) {
+            throw new Error('Email is not valid')
+        }
+        if (!validator.validatePassword(password)) {
+            throw new Error('Password is not valid')
+        }
 
         const user = await User.findOne({email})
 
@@ -21,7 +26,12 @@ class AuthService {
     }
 
     async signUp(user) {
-        validator.validateCredentials(user.email, user.password)
+        if (!validator.validateEmail(user.email)) {
+            throw new Error('Email is not valid')
+        }
+        if (!validator.validatePassword(user.password)) {
+            throw new Error('Password is not valid')
+        }
 
         const salt = await bcrypt.genSalt(10)
         user.password = await bcrypt.hash(user.password, salt)

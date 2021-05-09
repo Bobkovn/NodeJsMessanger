@@ -1,20 +1,27 @@
 import AutService from "../services/auth.js"
-import makeValidation from "@withvoid/make-validation"
+import Ajv from "ajv"
 
+const ajv = new Ajv()
 class AuthController {
     async logIn(req, res, next) {
         try {
             let body = req.body
-            const validation = makeValidation(types => ({
-                payload: body,
-                checks: {
-                    email: {type: types.string},
-                    password: {type: types.string},
-                }
-            }))
-            if (!validation.success) {
-                return res.status(400).json(validation)
+            const schema = {
+                type: "object",
+                properties: {
+                    email: {type: "string"},
+                    password: {type: "string"}
+                },
+                required: ["email", "password"],
+                additionalProperties: false,
             }
+
+            const validate = ajv.compile(schema)
+            const valid = validate(body)
+            if (!valid) {
+                return res.status(400).json(validate.errors)
+            }
+
             req.user = await AutService.logIn(body.email, body.password)
             next()
         } catch (e) {
@@ -25,18 +32,24 @@ class AuthController {
     async signUp(req, res, next) {
         try {
             let body = req.body
-            const validation = makeValidation(types => ({
-                payload: body,
-                checks: {
-                    name: {type: types.string},
-                    referenceName: {type: types.string},
-                    email: {type: types.string},
-                    password: {type: types.string},
-                }
-            }))
-            if (!validation.success) {
-                return res.status(400).json(validation)
+            const schema = {
+                type: "object",
+                properties: {
+                    name: {type: "string"},
+                    referenceName: {type: "string"},
+                    email: {type: "string"},
+                    password: {type: "string"}
+                },
+                required: ["name", "referenceName", "email", "password"],
+                additionalProperties: false,
             }
+
+            const validate = ajv.compile(schema)
+            const valid = validate(body)
+            if (!valid) {
+                return res.status(400).json(validate.errors)
+            }
+
             req.user = await AutService.signUp(body)
             next()
         } catch (e) {

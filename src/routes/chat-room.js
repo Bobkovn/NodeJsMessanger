@@ -1,15 +1,16 @@
 import express from 'express'
 import chatRoom from '../controllers/chat-room.js'
+import {auth} from '../middlewares/jwt.js'
 
 const router = express.Router()
 
 router
-    .get('/', chatRoom.getRecentConversation)
-    .get('/:roomId', chatRoom.getConversationByRoomId)
-    .post('/initiate', chatRoom.initiate)
-    .post('/:roomId/message', chatRoom.postMessage)
-    .put('/:roomId/mark-read', chatRoom.markConversationReadByRoomId)
-    .delete('/room/:roomId', chatRoom.deleteRoomById)
-    .delete('/message/:messageId', chatRoom.deleteMessageById)
+    .post('/:roomId/message', auth, chatRoom.postMessage)
+    .get('/', auth, chatRoom.getRecentConversation)
+    .get('/:roomId', auth, chatRoom.getConversationByRoomId)
+    .post('/initiate', auth, chatRoom.initiate)
+    .put('/:roomId/mark-read', auth, chatRoom.markConversationReadByRoomId)
+    .delete('/room/:roomId', auth, chatRoom.deleteRoomById)
+    .delete('/message/:messageId', auth, chatRoom.deleteMessageById)
 
 export default router

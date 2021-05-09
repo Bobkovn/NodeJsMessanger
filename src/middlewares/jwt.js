@@ -55,3 +55,15 @@ export const refreshToken = async (req, res) => {
         res.status(401).send({error: e.error, message: e.message})
     }
 }
+
+export const authWebSocket = async (data, callback) => {
+    if (!data.token) {
+        callback("Authorization token required", null)
+    }
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET)
+        callback(null, await UserService.onGetUserByToken(decoded._id, token))
+    } catch (e) {
+        callback({error: e.error, message: e.message}, null)
+    }
+}

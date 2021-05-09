@@ -1,20 +1,47 @@
+import {authWebSocket} from '../middlewares/jwt.js'
 
-export const connection = (client) => {
+class WebSocketChats {
 
-    client.on("disconnect", () => {
+    connection(socket) {
 
-    })
+        socket.on("disconnect", (data, cb) => {
 
-    client.on("identity", (userId) => {
+        })
 
-    })
+        socket.on("subscribeToChat", (data, cb) => {
+            authWebSocket(data, (error, user) => {
+                if (error) {
+                    cb(error)
+                } else  {
+                    socket.join(data.chatRoomId)
+                }
+            })
+        })
 
-    client.on("subscribe", (room, otherUserId = "") => {
+        socket.on("unsubscribeFromChat", (data, cb) => {
+            authWebSocket(data, (error, user) => {
+                if (error) {
+                    cb(error)
+                } else  {
+                    socket.leave(data.chatRoomId)
+                }
+            })
+            // socket.to(user.room).emit("message", generatemsg(`Admin ${user.username} A user  has left`))
+        })
 
-        client.join(room)
-    })
+    }
 
-    client.on("unsubscribe", (room) => {
-        client.leave(room)
-    })
+    subscribeOtherUser(room, otherUserId) {
+        const userSockets = this.users.filter(
+            (user) => user.userId === otherUserId
+        )
+        userSockets.map((userInfo) => {
+            const socketConn = global.io.sockets.connected(userInfo.socketId);
+            if (socketConn) {
+                // socketConn.join(room)
+            }
+        })
+    }
 }
+
+export default new WebSocketChats()

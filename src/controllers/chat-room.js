@@ -1,5 +1,6 @@
 import ChatRoomModel, {CHAT_ROOM_TYPES} from '../models/chat-room.js'
 import ChatMessageModel from '../models/chat-message.js'
+import ChatService from '../services/chat.js'
 import UserModel from '../models/user.js'
 import Ajv from "ajv"
 
@@ -62,7 +63,7 @@ class ChatRoomController {
             }
             const currentLoggedUser = req.userId
             const post = await ChatMessageModel.createPostInChatRoom(roomId, messagePayload, currentLoggedUser)
-            global.io.sockets.in(roomId).emit('new message', {message: post})
+            io.sockets.in(roomId).emit('newMessage', {message: post})
             return res.status(200).json({success: true, post})
         } catch (error) {
             return res.status(500).json({success: false, error: error})

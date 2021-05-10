@@ -8,8 +8,8 @@ class WebSocketChats {
 
         })
 
-        socket.on("subscribeToChat", (data, cb) => {
-            authWebSocket(data, (error, user) => {
+        socket.on("subscribeToChat", async (data, cb) => {
+            await authWebSocket(data, (error, user) => {
                 if (error) {
                     cb(error)
                 } else {
@@ -18,8 +18,8 @@ class WebSocketChats {
             })
         })
 
-        socket.on("unsubscribeFromChat", (data, cb) => {
-            authWebSocket(data, (error, user) => {
+        socket.on("unsubscribeFromChat", async (data, cb) => {
+            await authWebSocket(data, (error, user) => {
                 if (error) {
                     cb(error)
                 } else {
@@ -28,8 +28,8 @@ class WebSocketChats {
             })
         })
 
-        socket.on("typing", (data, cb) => {
-            authWebSocket(data, (error, user) => {
+        socket.on("typing", async (data, cb) => {
+            await authWebSocket(data, (error, user) => {
                 if (error) {
                     cb(error)
                 } else {
@@ -40,18 +40,6 @@ class WebSocketChats {
             })
         })
 
-    }
-
-    subscribeOtherUser(room, otherUserId) {
-        const userSockets = this.users.filter(
-            (user) => user.userId === otherUserId
-        )
-        userSockets.map((userInfo) => {
-            const socketConn = global.io.sockets.connected(userInfo.socketId);
-            if (socketConn) {
-                // socketConn.join(room)
-            }
-        })
     }
 }
 

@@ -12,7 +12,7 @@ class WebSocketChats {
             authWebSocket(data, (error, user) => {
                 if (error) {
                     cb(error)
-                } else  {
+                } else {
                     socket.join(data.chatRoomId)
                 }
             })
@@ -22,11 +22,22 @@ class WebSocketChats {
             authWebSocket(data, (error, user) => {
                 if (error) {
                     cb(error)
-                } else  {
+                } else {
                     socket.leave(data.chatRoomId)
                 }
             })
-            // socket.to(user.room).emit("message", generatemsg(`Admin ${user.username} A user  has left`))
+        })
+
+        socket.on("typing", (data, cb) => {
+            authWebSocket(data, (error, user) => {
+                if (error) {
+                    cb(error)
+                } else {
+                    if (user.chatRoomIds.includes(data.chatRoomId)) {
+                        socket.to(data.chatRoomId).broadcast.emit("typing", user.name)
+                    }
+                }
+            })
         })
 
     }
